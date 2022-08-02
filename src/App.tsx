@@ -1,110 +1,133 @@
-import {
-  makeStyles,
-  Container,
-  Typography,
-  TextField,
-  Button,
-} from "@material-ui/core";
-import { useForm } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-// import { useState } from "react";
+import { Formik } from "formik";
+import * as Yup from "yup";
+import "./App.css"
 
-interface IFormInput {
-  email: string;
-  firstName: string;
-  password: string;
-}
+// Creating schema
+const passwordRules = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{5,}$/;
+const schema = Yup.object().shape({
+  name: Yup.string()
+    .min(3, "Username must be at least 3 charecter long")
+    .required("Required"),
+  email: Yup.string()
+    .required("Email is a required field")
+    .email("Invalid email format"),
+  password: Yup.string()
+    .required("Password is a required field")
+    .min(5, "Password must be at least 8 characters")
+    .matches(passwordRules, { message: "Should contain 1 UPPER case letter 1 special charecter,1number, and should be of 8 charecter" }),
 
-const schema = yup.object().shape({
-  email: yup.string().required("Email is a required").email(),
-  firstName: yup.string().required().min(2).max(25),
-  password: yup.string().required().min(8).max(120),
+    confirmpassword:Yup.string()
+    .oneOf([Yup.ref('password'),null],"Password must be matched")
+    .required("Required")
+
 });
 
-const useStyles = makeStyles((theme) => ({
-  heading: {
-    textAlign: "center",
-    margin: theme.spacing(1, 0, 4),
-  },
-  submitButton: {
-    marginTop: theme.spacing(4),
-  },
-}));
+interface initialState{
+  name:string,
+  email:string,
+  password:string,
+  confirmpassword:string
+}
 
-function App() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<IFormInput>({
-    resolver: yupResolver(schema),
-  });
-
-  const { heading, submitButton } = useStyles();
-
-
-  const onSubmit = (data: IFormInput) => {
-    alert("you have submitted the form")
-
-  };
-
+const Registration = () => {
   return (
-    <Container maxWidth="xs">
-      <Typography className={heading} variant="h3">
-        Sign Up Form
-      </Typography>
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <TextField
-          {...register("email")}
-          variant="outlined"
-          margin="normal"
-          label="Email"
-          helperText={errors.email?.message}
-          error={!!errors.email?.message}
-          fullWidth
-          required
-        />
-        <TextField
-          {...register("firstName")}
-          variant="outlined"
-          margin="normal"
-          label="First Name"
-          helperText={errors.firstName?.message}
-          error={!!errors.firstName?.message}
-          fullWidth
-        />
-        <TextField
-          {...register("password")}
-          variant="outlined"
-          margin="normal"
-          label="Password"
-          helperText={errors.password?.message}
-          error={!!errors.password?.message}
-          type="password"
-          fullWidth
-        />
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          color="primary"
-          className={submitButton}
-        >
-          Sign Up
-        </Button>
-        {/* {json && (
-          <>
-            <Typography variant="body1">
-              Below is the JSON that would normally get passed to the server
-              when a form gets submitted
-            </Typography>
-            <Typography variant="body2"></Typography>
-          </>
-        )} */}
-      </form>
-    </Container>
+    <>
+      {/* Wrapping form inside formik tag and passing our schema to validationSchema prop */}
+      <Formik
+        validationSchema={schema}
+        initialValues={{ name: "", email: "", password:"", confirmpassword:"",date:""} as initialState} 
+        onSubmit={(values, actions) => {
+          // Alert the input values of the form that we filled
+          //   new Promise((resolve) => setTimeout(resolve, 1000));
+          //   alert(JSON.stringify(values));
+          actions.resetForm();
+          // window.location.href = "/dashboard"
+        }}
+      >
+        {({
+          values,
+          errors,
+          touched,
+          handleChange,
+          handleBlur,
+          handleSubmit
+        }) => (
+          <div className="login">
+            <div className="form">
+              {/* Passing handleSubmit parameter tohtml form onSubmit property */}
+              <form noValidate onSubmit={handleSubmit as any}>
+                {/* Our input html with passing formik parameters like handleChange, values, handleBlur to input properties */}
+                {/* Our input html with passing formik parameters like handleChange, values, handleBlur to input properties */}
+                <h1>Registration Form</h1>
+                <input
+                  type="name"
+                  name="name"
+                  onChange={handleChange as any}
+                  onBlur={handleBlur as any}
+                  value={values.name}
+                  placeholder="Enter your name"
+                  className="form-control inp_text"
+                  id="name"
+                />
+                {/* If validation is not passed show errors */}
+                {errors.name && touched.name && <p className="error">{errors.name}</p>}
+
+
+                <input
+                  type="email"
+                  name="email"
+                  onChange={handleChange as any}
+                  onBlur={handleBlur as any}
+                  value={values.email}
+                  placeholder="Enter email id / username"
+                  className="form-control inp_text"
+                  id="email"
+                />
+                {/* If validation is not pas    sed show errors */}
+                {errors.email && touched.email && <p className="error">{errors.email}</p>}
+
+                <input
+                  type="password"
+                  name="password"
+                  onChange={handleChange as any}
+                  onBlur={handleBlur as any}
+                  value={values.password}
+                  placeholder="Enter password"
+                  className="form-control"
+                />
+                {/* If validation is not passed show errors */}
+                <p className="error">
+                  {errors.password && touched.password && errors.password}
+                </p>
+
+
+                
+                <input
+                  type="confirmpassword"
+                  name="confirmpassword"
+                  onChange={handleChange as any}
+                  onBlur={handleBlur as any}
+                  value={values.confirmpassword}
+                  placeholder="Enter password"
+                  className="form-control"
+                />
+                {/* If validation is not passed show errors */}
+                <p className="error">
+                  {errors.confirmpassword && touched.confirmpassword && errors.confirmpassword}
+                </p>
+
+
+
+
+                {/* Click on submit button to submit the form */}
+                <button type="submit">Login</button>
+              </form>
+            </div>
+          </div>
+        )}
+      </Formik>
+    </>
   );
 }
 
-export default App;
+export default Registration;
